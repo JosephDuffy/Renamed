@@ -40,7 +40,7 @@ This works for:
 - [x] Classes
 - [ ] Enums
 - [ ] Type aliases
-- [ ] Immutable properties
+- [x] Immutable properties
 - [ ] Mutable properties
 - [ ] Functions
 

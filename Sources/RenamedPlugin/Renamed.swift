@@ -23,8 +23,10 @@ public struct Renamed: PeerMacro {
             return try expansion(of: node, providingPeersOf: structDecl, in: context, previousName: previousName.content.text)
         } else if let classDecl = declaration.as(ClassDeclSyntax.self) {
             return try expansion(of: node, providingPeersOf: classDecl, in: context, previousName: previousName.content.text)
+        } else if let variableDecl = declaration.as(VariableDeclSyntax.self) {
+            return try expansion(of: node, providingPeersOf: variableDecl, in: context, previousName: previousName.content.text)
         } else {
-            throw InvalidDeclarationTypeError()
+            throw ErrorDiagnosticMessage(id: "invalid-declaration-type", message: "'Renamed' can only be applied to structs, classes, and variables")
         }
     }
 
@@ -34,7 +36,7 @@ public struct Renamed: PeerMacro {
         in context: Context,
         previousName: String
     ) throws -> [DeclSyntax] {
-        guard let identifiedDeclaration = declaration as? IdentifiedDeclSyntax else {
+        guard let identifiedDeclaration = declaration.asProtocol(IdentifiedDeclSyntax.self) else {
             throw InvalidDeclarationTypeError()
         }
 
@@ -61,6 +63,49 @@ public struct Renamed: PeerMacro {
             """
             @available(*, deprecated, renamed: "\(raw: identifiedDeclaration.identifier.text)")
             \(raw: scope)typealias \(raw: previousName) = \(raw: identifiedDeclaration.identifier.text)
+            """
+        ]
+    }
+
+    private static func expansion<Context: MacroExpansionContext>(
+        of node: AttributeSyntax,
+        providingPeersOf declaration: VariableDeclSyntax,
+        in context: Context,
+        previousName: String
+    ) throws -> [DeclSyntax] {
+        guard
+            let binding = declaration.bindings.first,
+            let propertyName = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text,
+            let type = binding.typeAnnotation?.type.as(SimpleTypeIdentifierSyntax.self)?.name
+        else {
+            throw ErrorDiagnosticMessage(id: "missing-variable-type", message: "'Renamed' requires a variable to be explicitly typed")
+        }
+
+        let scope = ({
+            for modifier in declaration.modifiers ?? [] {
+                switch (modifier.name.tokenKind) {
+                case .keyword(.public):
+                    return "public "
+                case .keyword(.internal):
+                    return "internal "
+                case .keyword(.fileprivate):
+                    return "fileprivate "
+                case .keyword(.private):
+                    return "private "
+                default:
+                    break
+                }
+            }
+
+            return ""
+        })()
+
+        return [
+            """
+            @available(*, deprecated, renamed: "\(raw: propertyName)")
+            \(raw: scope)var \(raw: previousName): \(raw: type) {
+                \(raw: propertyName)
+            }
             """
         ]
     }
