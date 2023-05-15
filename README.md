@@ -41,7 +41,7 @@ This works for:
 - [ ] Enums
 - [ ] Type aliases
 - [x] Immutable properties
-- [ ] Mutable properties
+- [x] Mutable properties
 - [ ] Functions
 
 ## FAQ

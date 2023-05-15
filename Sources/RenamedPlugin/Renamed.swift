@@ -100,14 +100,64 @@ public struct Renamed: PeerMacro {
             return ""
         })()
 
-        return [
-            """
-            @available(*, deprecated, renamed: "\(raw: propertyName)")
-            \(raw: scope)var \(raw: previousName): \(raw: type) {
+        lazy var immutableProperty: DeclSyntax = """
+        @available(*, deprecated, renamed: "\(raw: propertyName)")
+        \(raw: scope)var \(raw: previousName): \(raw: type) {
+            \(raw: propertyName)
+        }
+        """
+
+        lazy var mutableProperty: DeclSyntax = """
+        @available(*, deprecated, renamed: "\(raw: propertyName)")
+        \(raw: scope)var \(raw: previousName): \(raw: type) {
+            get {
                 \(raw: propertyName)
             }
-            """
-        ]
+            set {
+                \(raw: propertyName) = newValue
+            }
+        }
+        """
+
+        switch declaration.bindingKeyword.tokenKind {
+        case .keyword(.let):
+            return [
+                immutableProperty
+            ]
+        case .keyword(.var):
+            guard let binding = declaration.bindings.first else {
+                throw ErrorDiagnosticMessage(id: "missing-binding", message: "'Renamed' is only supported on variables with at least 1 binding")
+            }
+
+            if let accessor = binding.accessor {
+                // Could have get/set/_modify
+                if accessor.is(CodeBlockSyntax.self) {
+                    // This is a "naked" getter, e.g. not `get` or `set`
+                    return [immutableProperty]
+                }
+
+                guard let accessor = accessor.as(AccessorBlockSyntax.self) else {
+                    throw ErrorDiagnosticMessage(id: "unsupported-block", message: "'Renamed' is only supported on variables with block and explicit accessor syntax")
+                }
+
+                // TODO: Possible support other accessors, e.g. `_modify`
+
+                guard accessor.accessors.contains(where: { $0.accessorKind.tokenKind == .keyword(.get) }) else {
+                    throw ErrorDiagnosticMessage(id: "missing-get-accessor", message: "'Renamed' is only supported on variables with a getter")
+                }
+
+                if accessor.accessors.contains(where: { $0.accessorKind.tokenKind == .keyword(.set) }) {
+                    return [mutableProperty]
+                } else {
+                    return [immutableProperty]
+                }
+            } else {
+                // Not accessor; just a plain `var`.
+                return [mutableProperty]
+            }
+        default:
+            throw ErrorDiagnosticMessage(id: "unsupported-variable", message: "'Renamed' is only supported on var and let variables. This is a \(declaration.bindingKeyword)")
+        }
     }
 }
 
