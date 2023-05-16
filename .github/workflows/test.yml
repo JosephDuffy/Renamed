@@ -6,12 +6,13 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    env: TOOLCHAINS=org.swift.59202305141a
     steps:
       - uses: actions/checkout@v3
       - name: Install Swift Development Snapshot
         uses: slashmo/install-swift@v0.4.0
         with:
-          version: swift-DEVELOPMENT-SNAPSHOT-2023-04-27-a
+          version: swift-DEVELOPMENT-SNAPSHOT-2023-05-14-a
       - name: Build
         run: swift build
       - name: Test
