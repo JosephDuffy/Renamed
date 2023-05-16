@@ -10,6 +10,10 @@ final class RenamedTests: XCTestCase {
         XCTAssertTrue(OldClass.self == RenamedClass.self)
     }
 
+    func testTypealiasForEnum() {
+        XCTAssertTrue(OldEnum.self == RenamedEnum.self)
+    }
+
     func testRenamedProperties() {
         let immutablePropertyValue = "test-value"
         let initialMutablePropertyValue = "first-value"
@@ -42,6 +46,9 @@ private struct RenamedStruct {}
 
 @Renamed(from: "OldClass")
 private final class RenamedClass {}
+
+@Renamed(from: "OldEnum")
+private enum RenamedEnum {}
 
 private struct TestStruct {
     @Renamed(from: "oldImmutableProperty")

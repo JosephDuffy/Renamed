@@ -23,6 +23,8 @@ public struct Renamed: PeerMacro {
             return try expansion(of: node, providingPeersOf: structDecl, in: context, previousName: previousName.content.text)
         } else if let classDecl = declaration.as(ClassDeclSyntax.self) {
             return try expansion(of: node, providingPeersOf: classDecl, in: context, previousName: previousName.content.text)
+        } else if let enumDecl = declaration.as(EnumDeclSyntax.self) {
+            return try expansion(of: node, providingPeersOf: enumDecl, in: context, previousName: previousName.content.text)
         } else if let variableDecl = declaration.as(VariableDeclSyntax.self) {
             return try expansion(of: node, providingPeersOf: variableDecl, in: context, previousName: previousName.content.text)
         } else {
