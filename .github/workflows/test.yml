@@ -6,7 +6,8 @@ on:
 jobs:
   build:
     runs-on: macos-latest
-    env: TOOLCHAINS=org.swift.59202305141a
+    env
+      TOOLCHAINS: org.swift.59202305141a
     steps:
       - uses: actions/checkout@v3
       - name: Install Swift Development Snapshot
