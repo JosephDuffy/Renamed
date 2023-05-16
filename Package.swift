@@ -33,6 +33,9 @@ let package = Package(
       name: "Renamed",
       dependencies: [
         "RenamedPlugin",
+      ],
+      swiftSettings: [
+        .enableExperimentalFeature("Macros"),
       ]
     ),
     .testTarget(
