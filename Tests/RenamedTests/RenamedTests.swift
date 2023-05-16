@@ -3,11 +3,11 @@ import Renamed
 
 final class RenamedTests: XCTestCase {
     func testTypealiasForStruct() {
-        _ = OldStruct.self
+        XCTAssertTrue(OldStruct.self == RenamedStruct.self)
     }
 
     func testTypealiasForClass() {
-        _ = OldClass.self
+        XCTAssertTrue(OldClass.self == RenamedClass.self)
     }
 
     func testRenamedProperties() {
