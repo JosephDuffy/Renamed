@@ -27,6 +27,8 @@ public struct Renamed: PeerMacro {
             return try expansion(of: node, providingPeersOf: enumDecl, in: context, previousName: previousName.content.text)
         } else if let typealiasDecl = declaration.as(TypealiasDeclSyntax.self) {
             return try expansion(of: node, providingPeersOf: typealiasDecl, in: context, previousName: previousName.content.text)
+        } else if let functionDecl = declaration.as(FunctionDeclSyntax.self) {
+            return try expansion(of: node, providingPeersOf: functionDecl, in: context, previousName: previousName.content.text)
         } else if let variableDecl = declaration.as(VariableDeclSyntax.self) {
             return try expansion(of: node, providingPeersOf: variableDecl, in: context, previousName: previousName.content.text)
         } else {
@@ -63,6 +65,86 @@ public struct Renamed: PeerMacro {
             """
             @available(*, deprecated, renamed: "\(raw: declaration.identifier.text)")
             \(raw: scope)typealias \(raw: previousName) = \(raw: declaration.identifier.text)
+            """
+        ]
+    }
+
+    private static func expansion<Context: MacroExpansionContext>(
+        of node: AttributeSyntax,
+        providingPeersOf declaration: FunctionDeclSyntax,
+        in context: Context,
+        previousName: String
+    ) throws -> [DeclSyntax] {
+        let scope = ({
+            for modifier in declaration.modifiers ?? [] {
+                switch (modifier.name.tokenKind) {
+                case .keyword(.public):
+                    return "public "
+                case .keyword(.internal):
+                    return "internal "
+                case .keyword(.fileprivate):
+                    return "fileprivate "
+                case .keyword(.private):
+                    return "private "
+                default:
+                    break
+                }
+            }
+
+            return ""
+        })()
+
+        let functionNameSplit = previousName.split(separator: "(", maxSplits: 1)
+        guard functionNameSplit.count == 2 else {
+            throw ErrorDiagnosticMessage(id: "invalid-function-signature", message: "The provided function signature is not valid")
+        }
+
+        guard functionNameSplit[1].last == ")" else {
+            throw ErrorDiagnosticMessage(id: "invalid-function-signature", message: "The provided function signature is not valid")
+        }
+
+        let parametersSplit = functionNameSplit[1].dropLast().split(separator: ":")
+
+        guard declaration.signature.input.parameterList.count == parametersSplit.count else {
+            throw ErrorDiagnosticMessage(id: "invalid-function-parameter-count", message: "The old function signature must have the same number of parameters as the function 'Renamed' is applied to.")
+        }
+
+        let functionName = functionNameSplit[0]
+
+        let argumentsAndTypes = declaration.signature.input.parameterList.map { parameter -> (TokenSyntax?, TypeSyntaxProtocol) in
+            let type = parameter.type
+
+             if parameter.firstName.text == "_" {
+                return (nil, type)
+            } else {
+                return (parameter.firstName, type)
+            }
+        }
+
+        let parametersInBody = argumentsAndTypes.map(\.0).enumerated().map { index, argumentName in
+            if let argumentName {
+                return "\(argumentName): arg\(index)"
+            } else {
+                return "arg\(index)"
+            }
+        }.joined(separator: ", ")
+        let body: DeclSyntax = "\(declaration.identifier)(\(raw: parametersInBody))"
+
+        let newParameters = zip(parametersSplit, argumentsAndTypes.map(\.1)).enumerated().map { index, argumentLabelAndType in
+            "\(argumentLabelAndType.0) arg\(index): \(argumentLabelAndType.1)"
+        }.joined(separator: ", ")
+        let signature: DeclSyntax
+        if let output = declaration.signature.output {
+            signature = "\(raw: functionName)(\(raw: newParameters)) \(output)"
+        } else {
+            signature = "\(raw: functionName)(\(raw: newParameters))"
+        }
+
+        return [
+            """
+            func \(signature) {
+                \(body)
+            }
             """
         ]
     }

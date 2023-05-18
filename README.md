@@ -42,7 +42,7 @@ This works for:
 - [x] Type aliases
 - [x] Immutable properties
 - [x] Mutable properties
-- [ ] Functions
+- [x] Functions
 
 ## FAQ
 

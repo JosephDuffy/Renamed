@@ -41,6 +41,8 @@ final class RenamedTests: XCTestCase {
         XCTAssertEqual(testStruct.oldComputedImmutableProperty, computedImmutablePropertyValue)
         testStruct.oldComputedMutableProperty = updatedComputedMutablePropertyValue
         XCTAssertEqual(testStruct.oldComputedMutableProperty, updatedComputedMutablePropertyValue)
+
+        XCTAssertTrue(testStruct.oldTestFunction("", oldArgumentLabel: 0, false, oldTrailingClosure: {}))
     }
 }
 
@@ -87,5 +89,10 @@ private struct TestStruct {
         self.mutableProperty = mutableProperty
         _computedImmutableProperty = computedImmutableProperty
         _computedMutableProperty = computedMutableProperty
+    }
+
+    @Renamed(from: "oldTestFunction(_:oldArgumentLabel:_:oldTrailingClosure)")
+    func testFunction(_ unnamedParameter: String, argumentLabel parameterName: Int, previouslyUnnamed: Bool, trailingClosure: @escaping () -> Void) -> Bool {
+        true
     }
 }
