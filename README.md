@@ -39,7 +39,7 @@ This works for:
 - [x] Structs
 - [x] Classes
 - [x] Enums
-- [ ] Type aliases
+- [x] Type aliases
 - [x] Immutable properties
 - [x] Mutable properties
 - [ ] Functions

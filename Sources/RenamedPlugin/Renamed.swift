@@ -25,23 +25,21 @@ public struct Renamed: PeerMacro {
             return try expansion(of: node, providingPeersOf: classDecl, in: context, previousName: previousName.content.text)
         } else if let enumDecl = declaration.as(EnumDeclSyntax.self) {
             return try expansion(of: node, providingPeersOf: enumDecl, in: context, previousName: previousName.content.text)
+        } else if let typealiasDecl = declaration.as(TypealiasDeclSyntax.self) {
+            return try expansion(of: node, providingPeersOf: typealiasDecl, in: context, previousName: previousName.content.text)
         } else if let variableDecl = declaration.as(VariableDeclSyntax.self) {
             return try expansion(of: node, providingPeersOf: variableDecl, in: context, previousName: previousName.content.text)
         } else {
-            throw ErrorDiagnosticMessage(id: "invalid-declaration-type", message: "'Renamed' can only be applied to structs, classes, and variables")
+            throw ErrorDiagnosticMessage(id: "invalid-declaration-type", message: "'Renamed' can only be applied to structs, classes, enums, typealiases, and variables")
         }
     }
 
     private static func expansion<Context: MacroExpansionContext>(
         of node: AttributeSyntax,
-        providingPeersOf declaration: some DeclGroupSyntax,
+        providingPeersOf declaration: some IdentifiedDeclSyntax & ModifiedDeclSyntax,
         in context: Context,
         previousName: String
     ) throws -> [DeclSyntax] {
-        guard let identifiedDeclaration = declaration.asProtocol(IdentifiedDeclSyntax.self) else {
-            throw InvalidDeclarationTypeError()
-        }
-
         let scope = ({
             for modifier in declaration.modifiers ?? [] {
                 switch (modifier.name.tokenKind) {
@@ -63,8 +61,8 @@ public struct Renamed: PeerMacro {
 
         return [
             """
-            @available(*, deprecated, renamed: "\(raw: identifiedDeclaration.identifier.text)")
-            \(raw: scope)typealias \(raw: previousName) = \(raw: identifiedDeclaration.identifier.text)
+            @available(*, deprecated, renamed: "\(raw: declaration.identifier.text)")
+            \(raw: scope)typealias \(raw: previousName) = \(raw: declaration.identifier.text)
             """
         ]
     }
@@ -176,3 +174,12 @@ private struct ErrorDiagnosticMessage: DiagnosticMessage, Error {
         severity = .error
     }
 }
+
+private protocol ModifiedDeclSyntax: SyntaxProtocol {
+    var modifiers: ModifierListSyntax? { get set }
+}
+
+extension StructDeclSyntax: ModifiedDeclSyntax {}
+extension ClassDeclSyntax: ModifiedDeclSyntax {}
+extension EnumDeclSyntax: ModifiedDeclSyntax {}
+extension TypealiasDeclSyntax: ModifiedDeclSyntax {}
