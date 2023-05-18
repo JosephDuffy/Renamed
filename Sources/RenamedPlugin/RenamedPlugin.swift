@@ -1,4 +1,3 @@
-#if canImport(SwiftCompilerPlugin)
 import SwiftCompilerPlugin
 import SwiftSyntaxMacros
 
@@ -8,4 +7,3 @@ struct RenamedPlugin: CompilerPlugin {
     Renamed.self,
   ]
 }
-#endif
