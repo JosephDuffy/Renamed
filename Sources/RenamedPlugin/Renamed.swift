@@ -160,6 +160,8 @@ public struct Renamed: PeerMacro {
             let propertyName = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text,
             let type = binding.typeAnnotation?.type.as(SimpleTypeIdentifierSyntax.self)?.name
         else {
+            // Variables declared with some values, e.g. `var test = 1`, will have an implicit type. These could be supported by looking a
+            // initialiser but it gets complex once basic types are done, e.g. to infer the type of an array.
             throw ErrorDiagnosticMessage(id: "missing-variable-type", message: "'Renamed' requires a variable to be explicitly typed")
         }
 
@@ -222,7 +224,7 @@ public struct Renamed: PeerMacro {
                     throw ErrorDiagnosticMessage(id: "unsupported-block", message: "'Renamed' is only supported on variables with block and explicit accessor syntax")
                 }
 
-                // TODO: Possible support other accessors, e.g. `_modify`
+                // TODO: Possible support other accessors, e.g. `_modify`, `willSet`, and `didSet`
 
                 guard accessor.accessors.contains(where: { $0.accessorKind.tokenKind == .keyword(.get) }) else {
                     throw ErrorDiagnosticMessage(id: "missing-get-accessor", message: "'Renamed' is only supported on variables with a getter")
