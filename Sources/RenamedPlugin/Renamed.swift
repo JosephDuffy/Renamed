@@ -75,23 +75,23 @@ public struct Renamed: PeerMacro {
         in context: Context,
         previousName: String
     ) throws -> [DeclSyntax] {
-        let scope = ({
+        let scope: DeclModifierSyntax? = ({
             for modifier in declaration.modifiers ?? [] {
                 switch (modifier.name.tokenKind) {
                 case .keyword(.public):
-                    return "public "
+                    return modifier
                 case .keyword(.internal):
-                    return "internal "
+                    return modifier
                 case .keyword(.fileprivate):
-                    return "fileprivate "
+                    return modifier
                 case .keyword(.private):
-                    return "private "
+                    return modifier
                 default:
                     break
                 }
             }
 
-            return ""
+            return nil
         })()
 
         let functionNameSplit = previousName.split(separator: "(", maxSplits: 1)
@@ -133,16 +133,11 @@ public struct Renamed: PeerMacro {
         let newParameters = zip(parametersSplit, argumentsAndTypes.map(\.1)).enumerated().map { index, argumentLabelAndType in
             "\(argumentLabelAndType.0) arg\(index): \(argumentLabelAndType.1)"
         }.joined(separator: ", ")
-        let signature: DeclSyntax
-        if let output = declaration.signature.output {
-            signature = "\(raw: functionName)(\(raw: newParameters)) \(output)"
-        } else {
-            signature = "\(raw: functionName)(\(raw: newParameters))"
-        }
+        let signature: DeclSyntax = "\(raw: functionName)(\(raw: newParameters)) \(optional: declaration.signature.output)"
 
         return [
             """
-            func \(signature) {
+            \(optional: scope)func \(signature){
                 \(body)
             }
             """

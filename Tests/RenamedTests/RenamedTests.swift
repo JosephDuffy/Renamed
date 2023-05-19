@@ -92,7 +92,7 @@ private struct TestStruct {
     }
 
     @Renamed(from: "oldTestFunction(_:oldArgumentLabel:_:oldTrailingClosure)")
-    func testFunction(_ unnamedParameter: String, argumentLabel parameterName: Int, previouslyUnnamed: Bool, trailingClosure: @escaping () -> Void) -> Bool {
+    public func testFunction(_ unnamedParameter: String, argumentLabel parameterName: Int, previouslyUnnamed: Bool, trailingClosure: @escaping () -> Void) -> Bool {
         true
     }
 }
