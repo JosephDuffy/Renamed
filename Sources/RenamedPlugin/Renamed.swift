@@ -95,26 +95,13 @@ public struct Renamed: PeerMacro {
         })()
 
         let functionNameSplit = previousName.split(separator: "(", maxSplits: 1)
-        guard functionNameSplit.count == 2 else {
-            throw ErrorDiagnosticMessage(id: "invalid-function-signature", message: "The provided function signature is not valid")
-        }
 
-        guard functionNameSplit[1].last == ")" else {
-            throw ErrorDiagnosticMessage(id: "invalid-function-signature", message: "The provided function signature is not valid")
-        }
-
-        let parametersSplit = functionNameSplit[1].dropLast().split(separator: ":")
-
-        guard declaration.signature.input.parameterList.count == parametersSplit.count else {
-            throw ErrorDiagnosticMessage(id: "invalid-function-parameter-count", message: "The old function signature must have the same number of parameters as the function 'Renamed' is applied to.")
-        }
-
-        let functionName = functionNameSplit[0]
+        let newParameters: String
 
         let argumentsAndTypes = declaration.signature.input.parameterList.map { parameter -> (TokenSyntax?, TypeSyntaxProtocol) in
             let type = parameter.type
 
-             if parameter.firstName.text == "_" {
+            if parameter.firstName.text == "_" {
                 return (nil, type)
             } else {
                 return (parameter.firstName, type)
@@ -130,9 +117,29 @@ public struct Renamed: PeerMacro {
         }.joined(separator: ", ")
         let body: DeclSyntax = "\(declaration.identifier)(\(raw: parametersInBody))"
 
-        let newParameters = zip(parametersSplit, argumentsAndTypes.map(\.1)).enumerated().map { index, argumentLabelAndType in
-            "\(argumentLabelAndType.0) arg\(index): \(argumentLabelAndType.1)"
-        }.joined(separator: ", ")
+        if functionNameSplit.count == 2 {
+            guard functionNameSplit[1].last == ")" else {
+                throw ErrorDiagnosticMessage(id: "invalid-function-signature", message: "The provided function signature is not valid. Missing matching closing parenthesis.")
+            }
+
+            let parametersSplit = functionNameSplit[1].dropLast().split(separator: ":")
+
+            guard declaration.signature.input.parameterList.count == parametersSplit.count else {
+                throw ErrorDiagnosticMessage(id: "invalid-function-parameter-count", message: "The old function signature must have the same number of parameters as the function 'Renamed' is applied to.")
+            }
+
+            newParameters = zip(parametersSplit, argumentsAndTypes.map(\.1)).enumerated().map { index, argumentLabelAndType in
+                "\(argumentLabelAndType.0) arg\(index): \(argumentLabelAndType.1)"
+            }.joined(separator: ", ")
+        } else {
+            guard declaration.signature.input.parameterList.count == 0 else {
+                throw ErrorDiagnosticMessage(id: "invalid-function-parameter-count", message: "The old function signature must have the same number of parameters as the function 'Renamed' is applied to.")
+            }
+
+            newParameters = ""
+        }
+
+        let functionName = functionNameSplit[0]
         let signature: DeclSyntax = "\(raw: functionName)(\(raw: newParameters)) \(optional: declaration.signature.output)"
 
         return [
