@@ -44,7 +44,7 @@ final class RenamedTests: XCTestCase {
 
         XCTAssertTrue(testStruct.oldTestFunction("", oldArgumentLabel: 0, false, oldTrailingClosure: {}))
 
-        _ = testStruct.oldTestFunctionWithoutReturn()
+        testStruct.oldTestFunctionWithoutReturn()
     }
 }
 

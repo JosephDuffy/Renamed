@@ -139,11 +139,17 @@ public struct Renamed: PeerMacro {
             newParameters = ""
         }
 
+        var renamedParameters = declaration.signature.input.parameterList.map { $0.firstName.text }.joined(separator: ":")
+        if !renamedParameters.isEmpty {
+            renamedParameters = "(" + renamedParameters + ":)"
+        }
+
         let functionName = functionNameSplit[0]
         let signature: DeclSyntax = "\(raw: functionName)(\(raw: newParameters)) \(optional: declaration.signature.output)"
 
         return [
             """
+            @available(*, deprecated, renamed: "\(declaration.identifier)\(raw: renamedParameters)")
             \(optional: scope)func \(signature){
                 \(body)
             }
