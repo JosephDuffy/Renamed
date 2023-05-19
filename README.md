@@ -32,7 +32,24 @@ struct MyType {
 }
 ```
 
-(this isn't _exactly_ how the macro gets expanded, but that's not important here)
+(this isn't _exactly_ how the macro gets expanded, but that's not important here).
+
+`Renamed` uses the same naming syntax as the `renamed` parameter of the `@available` attribute. For example, renaming a function is also supported.
+
+```swift
+@Renamed(from: "oldFunctionName(argument:_)")
+func newFunctionName(_ variableName: String, argumentName: Int) -> Bool {}
+```
+
+produces:
+
+```swift
+func oldFunctionName(argument arg0: String, _ arg1: Int) -> Bool {
+    newFunctionName(arg0, argumentName: arg1)
+}
+```
+
+Functions without parameters can omit the
 
 This works for:
 
@@ -45,6 +62,12 @@ This works for:
 - [x] Functions
 
 ## FAQ
+
+**Q: How ready is this?**
+
+This is past the proof-of-concept phase, but since official support for macros is not available this is still an alpha. There are probably more cases that can be supported and most descriptive errors that could be thrown in some cases (e.g. rather than producing invalid code).
+
+With all that said, all supported use-cases have associated tests that prove this works.
 
 **Q: Will this be slow?**
 
