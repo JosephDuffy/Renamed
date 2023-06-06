@@ -70,7 +70,7 @@ This works for:
 
 **Q: How ready is this?**
 
-This is past the proof-of-concept phase, but since official support for macros is not available this is still an alpha. There are probably more cases that can be supported and most descriptive errors that could be thrown in some cases (e.g. rather than producing invalid code).
+This is currently in beta, with support for the latest Swift 5.9 snapshot, specifically tested with the Xcode 15 beta. There are probably more cases that can be supported and most descriptive errors that could be thrown in some cases (e.g. rather than producing invalid code).
 
 With all that said, all supported use-cases have associated tests that prove this works.
 
