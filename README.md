@@ -74,10 +74,6 @@ This is currently in beta, with support for the latest Swift 5.9 snapshot, speci
 
 With all that said, all supported use-cases have associated tests that prove this works.
 
-**Q: Why is CI failing?**
-
-**A:** I have no idea! Everything Works On My Machine™ and the error doesn't make sense to me. If you have any ideas please tell me!
-
 **Q: I found something that doesn't work. What can I do?**
 
 **A:** Please open an issue or, better yet, a PR with a failing or implementation. I'm sure there are some edge cases I've not thought of!
