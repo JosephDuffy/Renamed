@@ -42,7 +42,11 @@ let package = Package(
     ),
     .testTarget(
       name: "RenamedTests",
-      dependencies: ["Renamed"]
+      dependencies: [
+        "RenamedPlugin",
+        .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+        .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
+      ]
     ),
   ]
 )
