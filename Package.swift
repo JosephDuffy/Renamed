@@ -24,6 +24,12 @@ let package = Package(
     ),
   ],
   targets: [
+    .target(
+        name: "Renamed",
+        dependencies: [
+            "RenamedPlugin",
+        ]
+    ),
     .macro(
       name: "RenamedPlugin",
       dependencies: [
@@ -32,15 +38,6 @@ let package = Package(
         .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
         .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
         .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
-      ]
-    ),
-    .target(
-      name: "Renamed",
-      dependencies: [
-        "RenamedPlugin",
-      ],
-      swiftSettings: [
-        .enableExperimentalFeature("Macros"),
       ]
     ),
     .testTarget(
