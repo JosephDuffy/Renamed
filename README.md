@@ -96,7 +96,7 @@ With all that said, all supported use-cases have associated tests that prove thi
 
 **Q: Where can I find more about macros?**
 
-**A:** [Swift Macros Dashboard](https://gist.github.com/DougGregor/de840fcf6d6f307792121eee11c0da85)
+**A:** [Swift Macros Dashboard](https://gist.github.com/DougGregor/de840fcf6d6f307792121eee11c0da85). [CustomHashable](https://github.com/JosephDuffy/CustomHashable).
 
 ## Installation
 
