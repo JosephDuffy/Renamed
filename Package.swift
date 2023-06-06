@@ -5,8 +5,11 @@ import PackageDescription
 let package = Package(
   name: "Renamed",
   platforms: [
-    .iOS(.v16),
-    .macOS(.v13),
+    .macOS(.v10_15),
+    .iOS(.v13),
+    .tvOS(.v13),
+    .watchOS(.v6),
+    .macCatalyst(.v13),
   ],
   products: [
     .library(
