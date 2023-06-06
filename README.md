@@ -49,7 +49,12 @@ func oldFunctionName(argument arg0: String, _ arg1: Int) -> Bool {
 }
 ```
 
-Functions without parameters can omit the
+Functions without parameters can omit the parentheses:
+
+```swift
+@Renamed(from: "oldFunctionName")
+func newFunctionName() -> Bool {}
+```
 
 This works for:
 
