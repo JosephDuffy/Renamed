@@ -1,6 +1,6 @@
 {
-  "swift.path": "/Library/Developer/Toolchains/swift-DEVELOPMENT-SNAPSHOT-2023-05-16-a.xctoolchain/usr/bin",
+  "swift.path": "/Library/Developer/Toolchains/swift-5.9-DEVELOPMENT-SNAPSHOT-2023-06-05-a.xctoolchain/usr/bin",
   "swift.swiftEnvironmentVariables": {
-    "TOOLCHAINS": "org.swift.59202305161a"
+    "TOOLCHAINS": "org.swift.59202306051a"
   }
 }
