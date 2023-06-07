@@ -62,14 +62,21 @@ final class RenamedTests: XCTestCase {
     func testTypealiasForTypealias() {
         assertMacroExpansion(
             """
+            @available(iOS 14, message: "Test Message!")
             @Renamed(from: "OldTypealias")
             public typealias RenamedTypealias = String
+
+            @Renamed(from: "OldTypealias2")
+            public typealias RenamedTypealias2 = String
             """,
             expandedSource: """
-
+            @available(iOS 14, message: "Test Message!")
             public typealias RenamedTypealias = String
-            @available(*, deprecated, renamed: "RenamedTypealias")
+            @available(iOS 14, deprecated, renamed: "RenamedTypealias")
             public typealias OldTypealias = RenamedTypealias
+            public typealias RenamedTypealias2 = String
+            @available(*, deprecated, renamed: "RenamedTypealias2")
+            public typealias OldTypealias2 = RenamedTypealias2
             """,
             macros: testMacros
         )

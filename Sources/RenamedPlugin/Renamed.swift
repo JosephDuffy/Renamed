@@ -26,7 +26,7 @@ public struct Renamed: PeerMacro {
         } else if let enumDecl = declaration.as(EnumDeclSyntax.self) {
             return try expansion(of: node, providingPeersOf: enumDecl, in: context, previousName: previousName.content.text)
         } else if let typealiasDecl = declaration.as(TypealiasDeclSyntax.self) {
-            return try expansion(of: node, providingPeersOf: typealiasDecl, in: context, previousName: previousName.content.text)
+            return try expansion(of: node, providingPeersOfTypealias: typealiasDecl, in: context, previousName: previousName.content)
         } else if let functionDecl = declaration.as(FunctionDeclSyntax.self) {
             return try expansion(of: node, providingPeersOf: functionDecl, in: context, previousName: previousName.content.text)
         } else if let variableDecl = declaration.as(VariableDeclSyntax.self) {
@@ -65,6 +65,64 @@ public struct Renamed: PeerMacro {
             """
             @available(*, deprecated, renamed: "\(raw: declaration.identifier.text)")
             \(raw: scope)typealias \(raw: previousName) = \(raw: declaration.identifier.text)
+        ]
+    }
+
+    private static func expansion<Context: MacroExpansionContext>(
+        of node: AttributeSyntax,
+        providingPeersOfTypealias declaration: TypealiasDeclSyntax,
+        in context: Context,
+        previousName: TokenSyntax
+    ) throws -> [DeclSyntax] {
+        let defaultVersionRestriction = AvailabilityVersionRestrictionSyntax(
+            platform: .identifier("*")
+        )
+
+        let versionRestriction: AvailabilityVersionRestrictionSyntax = declaration.attributes?.lazy.compactMap { attribute -> AvailabilityVersionRestrictionSyntax? in
+            attribute.as(AttributeSyntax.self)?.argument?.as(AvailabilitySpecListSyntax.self)?.lazy.compactMap { argument -> AvailabilityVersionRestrictionSyntax? in
+                argument.entry.as(AvailabilityVersionRestrictionSyntax.self)
+            }.first
+        }.first ?? defaultVersionRestriction
+
+        let availabilityArgument = AvailabilitySpecListSyntax {
+            AvailabilityArgumentSyntax(
+                entry: .availabilityVersionRestriction(versionRestriction),
+                trailingComma: .commaToken()
+            )
+            AvailabilityArgumentSyntax(
+                entry: .token(.keyword(.deprecated)),
+                trailingComma: .commaToken()
+            )
+            AvailabilityArgumentSyntax(
+                entry: .availabilityLabeledArgument(
+                    AvailabilityLabeledArgumentSyntax(label: .keyword(.renamed), value: .string(StringLiteralExprSyntax(content: declaration.identifier.text)))
+                )
+            )
+        }
+
+        let availableAttribute = AttributeSyntax(
+            attributeName: SimpleTypeIdentifierSyntax(
+                name: .keyword(.available)
+            ),
+            leftParen: .leftParenToken(),
+            argument: .availability(availabilityArgument),
+            rightParen: .rightParenToken()
+        )
+
+        var identifier = previousName
+        identifier.leadingTrivia = .space
+
+        let typealiasDecl = TypealiasDeclSyntax(
+            modifiers: declaration.modifiers,
+            identifier: identifier,
+            genericParameterClause: declaration.genericParameterClause,
+            initializer: TypeInitializerClauseSyntax(value: SimpleTypeIdentifierSyntax(name: .identifier(declaration.identifier.text))),
+            genericWhereClause: declaration.genericWhereClause
+        )
+
+        return [
+            """
+            \(availableAttribute)\(typealiasDecl)
             """
         ]
     }
