@@ -65,6 +65,7 @@ public struct Renamed: PeerMacro {
             """
             @available(*, deprecated, renamed: "\(raw: declaration.identifier.text)")
             \(raw: scope)typealias \(raw: previousName) = \(raw: declaration.identifier.text)
+            """
         ]
     }
 
